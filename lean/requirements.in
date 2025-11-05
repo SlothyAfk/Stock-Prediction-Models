@@ -1,0 +1,31 @@
+# Top-level Python dependencies for LEAN algorithmic trading
+# This file contains only direct dependencies.
+# Run pip-compile to generate requirements.locked.txt with exact versions.
+
+# Data Analysis and Manipulation
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Machine Learning Libraries
+scikit-learn>=1.3.0
+statsmodels>=0.14.0
+
+# Financial Data and Analysis
+QuantLib>=1.30
+ta-lib>=0.4.0
+
+# Technical Analysis
+pandas-ta>=0.3.14b
+
+# Optimization
+cvxpy>=1.4.0
+
+# Plotting and Visualization
+matplotlib>=3.7.0
+plotly>=5.14.0
+
+# Additional Utilities
+joblib>=1.3.0
+requests>=2.31.0
+pytz>=2023.3
