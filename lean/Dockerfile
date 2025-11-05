@@ -80,16 +80,11 @@ ENV PYTHONPATH="/Lean/Launcher/bin/Debug:${PYTHONPATH}"
 # 8080: API port (for live trading API)
 EXPOSE 5678 8080
 
-# Health check to verify LEAN engine is responsive
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD pgrep -f "QuantConnect.Lean.Launcher" || exit 1
-
-# Default entrypoint: Run the LEAN engine
-# This can be overridden in docker-compose.yml or at runtime
-ENTRYPOINT ["dotnet", "QuantConnect.Lean.Launcher.dll"]
-
-# Default command: Run with default configuration
-CMD ["--config", "/Lean/Launcher/config.json"]
+# No default ENTRYPOINT or CMD - allows full control from docker-compose.yml
+# For interactive pod usage, docker-compose will set the command
+# To run LEAN manually inside the pod:
+#   cd /Lean/Launcher/bin/Debug
+#   dotnet QuantConnect.Lean.Launcher.dll --config /Lean/config/config.json
 
 # ==============================================================================
 # Build Instructions:
