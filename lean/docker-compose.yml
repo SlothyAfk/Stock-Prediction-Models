@@ -67,6 +67,9 @@ services:
       - IB_PASSWORD=${IB_PASSWORD:-}
       - IB_TRADING_MODE=${IB_TRADING_MODE:-paper}
 
+      # Data Provider API Keys
+      - FINNHUB_API_KEY=${FINNHUB_API_KEY:-}
+
       # Python Configuration
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/Lean/Launcher/bin/Debug
