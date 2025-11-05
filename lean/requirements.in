@@ -14,6 +14,7 @@ statsmodels>=0.14.0
 # Financial Data and Analysis
 QuantLib>=1.30
 ta-lib>=0.4.0
+yfinance>=0.2.0
 
 # Technical Analysis
 pandas-ta>=0.3.14b

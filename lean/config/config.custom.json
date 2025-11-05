@@ -1,0 +1,69 @@
+{
+  "algorithm-type-name": "CustomDataAlertStrategy",
+  "algorithm-language": "Python",
+  "algorithm-location": "/Lean/Algorithm/custom_data_alert_strategy.py",
+
+  "environment": "backtesting",
+  "live-mode": false,
+
+  "data-folder": "/Lean/data",
+  "results-destination-folder": "/Results",
+  "cache-location": "/Lean/data/cache",
+
+  "job-user-id": "0",
+  "api-access-token": "",
+  "job-organization-id": "",
+
+  "job-queue-handler": "QuantConnect.Queues.JobQueue",
+  "api-handler": "QuantConnect.Api.Api",
+  "messaging-handler": "QuantConnect.Messaging.Messaging",
+  "log-handler": "QuantConnect.Logging.CompositeLogHandler",
+  "history-provider": "SubscriptionDataReaderHistoryProvider",
+
+  "close-automatically": true,
+
+  "maximum-warmup-history-days": 5,
+
+  "version-id": "",
+  "security-master": false,
+
+  "show-missing-data-logs": true,
+
+  "transaction-log": "/Results/log.txt",
+
+  "reserved-words-prefix": "",
+
+  "local-execution": true,
+
+  "debug-mode": true,
+
+  "parameters": {
+    "api-url": "http://localhost:8000/trading/alerts",
+    "api-key": "",
+    "dry-run": "true"
+  },
+
+  "environments": {
+    "backtesting": {
+      "live-mode": false
+    }
+  },
+
+  "backtesting": {
+    "start-date": "2024-10-01",
+    "end-date": "2024-10-31",
+    "cash": 100000,
+    "trade-on-calendar-days": false
+  },
+
+  "data-providers": {},
+  "alpha-providers": {},
+  "optimizer-settings": {},
+
+  "comments": {
+    "note": "Configuration for Custom Data + Alert Strategy",
+    "data-source": "YFinance 5-minute data in /Lean/data/custom/",
+    "execution": "Alert-based (no real trades)",
+    "universe": "10 tech stocks defined in algorithm"
+  }
+}

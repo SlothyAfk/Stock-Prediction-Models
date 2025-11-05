@@ -10,11 +10,13 @@ storage/
 # Algorithm workspace (ignore user algorithms but keep examples)
 algorithms/*.py
 !algorithms/example_algorithm.py
+!algorithms/custom_data_alert_strategy.py
 notebooks/
 
 # Configuration (may contain sensitive info)
 config/*.json
 !config/config.example.json
+!config/config.custom.json
 
 # Python
 __pycache__/
