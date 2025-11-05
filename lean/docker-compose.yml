@@ -106,10 +106,10 @@ services:
     # Port mappings
     ports:
       # Debugger port (for remote debugging)
-      - "${LEAN_DEBUG_PORT:-5678}:5678"
+      - "${LEAN_DEBUG_PORT:-15678}:5678"
 
       # API port (for live trading API)
-      - "${LEAN_API_PORT:-8080}:8080"
+      - "${LEAN_API_PORT:-18080}:8080"
 
     # Networking
     networks:
