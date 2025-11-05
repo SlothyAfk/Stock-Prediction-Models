@@ -1,0 +1,26 @@
+# Symbol Properties Database
+# Format: market,symbol,lot-size,minimum-price-variation,price-scaling,quote-currency,contract-multiplier,minimum-order-size,market-ticker,strike-multiplier,lot-size-conversion-rate
+#
+# This is a minimal symbol properties file for US equities backtesting
+# For production use, download the full database from QuantConnect
+
+# US Equity defaults
+usa,*,1,0.01,1,USD,1,1,,1,1
+
+# Major indices and ETFs
+usa,SPY,1,0.01,1,USD,1,1,,1,1
+usa,QQQ,1,0.01,1,USD,1,1,,1,1
+usa,IWM,1,0.01,1,USD,1,1,,1,1
+usa,DIA,1,0.01,1,USD,1,1,,1,1
+
+# Tech stocks (from our download list)
+usa,AAPL,1,0.01,1,USD,1,1,,1,1
+usa,MSFT,1,0.01,1,USD,1,1,,1,1
+usa,GOOGL,1,0.01,1,USD,1,1,,1,1
+usa,AMZN,1,0.01,1,USD,1,1,,1,1
+usa,NVDA,1,0.01,1,USD,1,1,,1,1
+usa,TSLA,1,0.01,1,USD,1,1,,1,1
+usa,META,1,0.01,1,USD,1,1,,1,1
+usa,AMD,1,0.01,1,USD,1,1,,1,1
+usa,INTC,1,0.01,1,USD,1,1,,1,1
+usa,NFLX,1,0.01,1,USD,1,1,,1,1
