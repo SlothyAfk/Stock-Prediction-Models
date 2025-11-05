@@ -100,18 +100,21 @@ class HostDataDownloader:
         """
         lean_df = df.copy().reset_index()
 
+        # YFinance uses 'Datetime' as the index name (after reset_index, it becomes a column)
+        dt_col = 'Datetime' if 'Datetime' in lean_df.columns else 'Date'
+
         # Convert timezone to UTC
-        if lean_df['Date'].dt.tz is not None:
-            lean_df['Date'] = lean_df['Date'].dt.tz_convert('UTC')
+        if lean_df[dt_col].dt.tz is not None:
+            lean_df[dt_col] = lean_df[dt_col].dt.tz_convert('UTC')
         else:
             # Assume market timezone if naive
-            lean_df['Date'] = lean_df['Date'].dt.tz_localize(self.market_tz).dt.tz_convert('UTC')
+            lean_df[dt_col] = lean_df[dt_col].dt.tz_localize(self.market_tz).dt.tz_convert('UTC')
 
         # Remove timezone info (LEAN expects naive UTC)
-        lean_df['Date'] = lean_df['Date'].dt.tz_localize(None)
+        lean_df[dt_col] = lean_df[dt_col].dt.tz_localize(None)
 
         # Format as LEAN expects: YYYYMMDD HH:MM:SS
-        lean_df['DateTime'] = lean_df['Date'].dt.strftime('%Y%m%d %H:%M:%S')
+        lean_df['DateTime'] = lean_df[dt_col].dt.strftime('%Y%m%d %H:%M:%S')
 
         # Select columns in LEAN order
         lean_df = lean_df[['DateTime', 'Open', 'High', 'Low', 'Close', 'Volume']]
