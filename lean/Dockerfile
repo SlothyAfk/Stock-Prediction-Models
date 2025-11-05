@@ -30,7 +30,7 @@
 # the digest changes. This guarantees immutability.
 # ------------------------------------------------------------------------------
 
-ARG BASE_DIGEST="sha256:8c1e1b4e8e8c8f8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e"
+ARG BASE_DIGEST="sha256:6b5eeea3f82130b4a0f097ce2a6651d0a06b452dcf6289cb5893fa2a61fdab70"
 
 # Use the official LEAN engine image, pinned by immutable digest
 FROM quantconnect/lean@${BASE_DIGEST}

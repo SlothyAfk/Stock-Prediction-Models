@@ -33,7 +33,7 @@ services:
       args:
         # Override BASE_DIGEST here if needed
         # To find current digest: docker image inspect quantconnect/lean:latest --format '{{index .RepoDigests 0}}'
-        BASE_DIGEST: "${LEAN_BASE_DIGEST:-sha256:8c1e1b4e8e8c8f8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e}"
+        BASE_DIGEST: "${LEAN_BASE_DIGEST:-sha256:6b5eeea3f82130b4a0f097ce2a6651d0a06b452dcf6289cb5893fa2a61fdab70}"
 
     # Image name and tag
     image: lean-locked:${LEAN_VERSION:-1.0.0}
