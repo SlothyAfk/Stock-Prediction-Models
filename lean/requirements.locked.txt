@@ -40,8 +40,8 @@ peewee==3.17.1
 frozendict==2.4.0
 
 # Technical Analysis
+ta-lib==0.6.8
 pandas-ta==0.3.14b0
-ta-lib==0.4.28
 
 # Optimization
 cvxpy==1.4.2
