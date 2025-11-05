@@ -41,32 +41,58 @@ LABEL description="Immutable LEAN Engine with Locked Python Dependencies"
 LABEL version="1.0.0"
 
 # ------------------------------------------------------------------------------
-# Stage 2: Install Locked Python Dependencies
+# Stage 2: Install System Dependencies and TA-Lib C Library
 # ------------------------------------------------------------------------------
 
 # Switch to root user for package installation
 # (The base LEAN image runs as root by default)
 USER root
 
+# Install build dependencies for TA-Lib
+RUN apt-get update && apt-get install -y \
+    wget \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install TA-Lib C library (required for ta-lib Python wrapper)
+RUN cd /tmp && \
+    wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
+    tar -xzf ta-lib-0.4.0-src.tar.gz && \
+    cd ta-lib/ && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install && \
+    ldconfig && \
+    cd /tmp && \
+    rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
+
+# ------------------------------------------------------------------------------
+# Stage 3: Install Locked Python Dependencies
+# ------------------------------------------------------------------------------
+
 # Set working directory for dependency installation
 WORKDIR /tmp/build
+
+# Install numpy first (required by TA-Lib and other packages)
+RUN pip install --no-cache-dir numpy==1.26.4
 
 # Copy ONLY the locked requirements file
 # This minimizes cache invalidation - requirements change less frequently than code
 COPY requirements.locked.txt .
 
 # Install dependencies with strict version pinning
+# Note: Using --no-deps removed - TA-Lib needs to build against numpy
 # Flags explained:
 #   --no-cache-dir: Don't cache packages (reduces image size)
-#   --no-deps: Don't install dependencies of dependencies (we've locked them all)
 #   -r: Install from requirements file
-RUN pip install --no-cache-dir --no-deps -r requirements.locked.txt
+RUN pip install --no-cache-dir -r requirements.locked.txt
 
 # Clean up temporary files
 RUN rm -rf /tmp/build
 
 # ------------------------------------------------------------------------------
-# Stage 3: Runtime Configuration
+# Stage 4: Runtime Configuration
 # ------------------------------------------------------------------------------
 
 # Return to the LEAN working directory
