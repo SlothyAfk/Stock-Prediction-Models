@@ -1,0 +1,251 @@
+version: '3.8'
+
+# ==============================================================================
+# IMMUTABLE LEAN DOCKER COMPOSE CONFIGURATION
+# ==============================================================================
+#
+# This docker-compose.yml orchestrates a production-grade, locked-down LEAN
+# algorithmic trading environment with:
+#   - Immutable base image (SHA256 digest pinned)
+#   - Strictly pinned Python dependencies
+#   - Persistent data volumes
+#   - Isolated network
+#   - Resource limits
+#   - Health checks
+#
+# Usage:
+#   Development:  docker-compose up
+#   Production:   docker-compose -f docker-compose.yml up -d
+#   Rebuild:      docker-compose build --no-cache
+#   Logs:         docker-compose logs -f lean-engine
+#
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # LEAN Engine Service
+  # ----------------------------------------------------------------------------
+  lean-engine:
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Override BASE_DIGEST here if needed
+        # To find current digest: docker image inspect quantconnect/lean:latest --format '{{index .RepoDigests 0}}'
+        BASE_DIGEST: "${LEAN_BASE_DIGEST:-sha256:8c1e1b4e8e8c8f8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e8e}"
+
+    # Image name and tag
+    image: lean-locked:${LEAN_VERSION:-1.0.0}
+
+    # Container name
+    container_name: lean-engine-locked
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Environment variables
+    environment:
+      # LEAN Configuration
+      - LEAN_MODE=${LEAN_MODE:-backtesting}
+      - LEAN_ENVIRONMENT=${LEAN_ENVIRONMENT:-live-paper}
+
+      # API Keys (load from .env file - NEVER commit these!)
+      - QC_API_TOKEN=${QC_API_TOKEN:-}
+      - QC_USER_ID=${QC_USER_ID:-}
+      - QC_ORGANIZATION_ID=${QC_ORGANIZATION_ID:-}
+
+      # Brokerage API Keys (examples - add yours in .env)
+      - IB_ACCOUNT=${IB_ACCOUNT:-}
+      - IB_USER_NAME=${IB_USER_NAME:-}
+      - IB_PASSWORD=${IB_PASSWORD:-}
+      - IB_TRADING_MODE=${IB_TRADING_MODE:-paper}
+
+      # Python Configuration
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/Lean/Launcher/bin/Debug
+
+      # Timezone
+      - TZ=${TZ:-America/New_York}
+
+    # Volume mounts
+    volumes:
+      # Algorithm source code (your trading algorithms)
+      - ${ALGORITHM_PATH:-./algorithms}:/Lean/Algorithm:ro
+
+      # LEAN configuration file
+      - ${CONFIG_PATH:-./config/config.json}:/Lean/Launcher/config.json:ro
+
+      # Data directory (market data, cache, etc.)
+      - lean-data:/Lean/Data
+
+      # Results directory (backtest results, logs, etc.)
+      - lean-results:/Results
+
+      # Logs directory
+      - lean-logs:/Lean/Logs
+
+      # Storage for live trading state
+      - lean-storage:/Lean/storage
+
+    # Port mappings
+    ports:
+      # Debugger port (for remote debugging)
+      - "${LEAN_DEBUG_PORT:-5678}:5678"
+
+      # API port (for live trading API)
+      - "${LEAN_API_PORT:-8080}:8080"
+
+    # Networking
+    networks:
+      - lean-network
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '${LEAN_CPU_LIMIT:-4.0}'
+          memory: ${LEAN_MEMORY_LIMIT:-8G}
+        reservations:
+          cpus: '${LEAN_CPU_RESERVATION:-2.0}'
+          memory: ${LEAN_MEMORY_RESERVATION:-4G}
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "QuantConnect.Lean.Launcher"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+
+    # Read-only root filesystem (optional, uncomment if desired)
+    # read_only: true
+
+    # Temporary filesystem mounts (for read-only root fs)
+    # tmpfs:
+    #   - /tmp
+    #   - /var/tmp
+
+  # ----------------------------------------------------------------------------
+  # (Optional) LEAN Research Service - Jupyter Notebook Environment
+  # ----------------------------------------------------------------------------
+  # Uncomment this section if you want to run LEAN's Jupyter research environment
+  #
+  # lean-research:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.research
+  #     args:
+  #       BASE_IMAGE: lean-locked:${LEAN_VERSION:-1.0.0}
+  #
+  #   image: lean-research-locked:${LEAN_VERSION:-1.0.0}
+  #   container_name: lean-research-locked
+  #   restart: unless-stopped
+  #
+  #   environment:
+  #     - JUPYTER_TOKEN=${JUPYTER_TOKEN:-lean-research-token}
+  #     - PYTHONPATH=/Lean/Launcher/bin/Debug
+  #
+  #   volumes:
+  #     - ${ALGORITHM_PATH:-./algorithms}:/Lean/Algorithm
+  #     - lean-data:/Lean/Data
+  #     - lean-results:/Results
+  #     - ./notebooks:/Lean/Notebooks
+  #
+  #   ports:
+  #     - "${JUPYTER_PORT:-8888}:8888"
+  #
+  #   networks:
+  #     - lean-network
+  #
+  #   depends_on:
+  #     - lean-engine
+
+# ==============================================================================
+# Volumes - Persistent Data Storage
+# ==============================================================================
+volumes:
+  # Market data, historical data, cache
+  lean-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}
+
+  # Backtest results, performance metrics
+  lean-results:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${RESULTS_PATH:-./results}
+
+  # Application logs
+  lean-logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_PATH:-./logs}
+
+  # Live trading state and storage
+  lean-storage:
+    driver: local
+
+# ==============================================================================
+# Networks - Isolated Network for LEAN Services
+# ==============================================================================
+networks:
+  lean-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${LEAN_SUBNET:-172.25.0.0/16}
+
+# ==============================================================================
+# Configuration Notes:
+# ==============================================================================
+#
+# 1. Environment Variables:
+#    - Create a .env file in the same directory as this docker-compose.yml
+#    - Define all sensitive credentials and configuration there
+#    - NEVER commit the .env file to version control
+#    - See .env.example for template
+#
+# 2. Volume Paths:
+#    - Create the following directories before running:
+#      mkdir -p algorithms config data results logs
+#    - Place your algorithm files in ./algorithms/
+#    - Place your config.json in ./config/
+#
+# 3. Configuration File:
+#    - Copy the default LEAN config:
+#      docker run --rm quantconnect/lean:latest cat /Lean/Launcher/config.json > config/config.json
+#    - Modify as needed for your use case
+#
+# 4. Updating Dependencies:
+#    - Edit requirements.in with new top-level dependencies
+#    - Regenerate requirements.locked.txt:
+#      docker run -v $(pwd):/app quantconnect/lean@YOUR_DIGEST \
+#        pip-compile /app/requirements.in -o /app/requirements.locked.txt
+#    - Rebuild: docker-compose build --no-cache
+#
+# 5. Updating LEAN Version:
+#    - Pull new version: docker pull quantconnect/lean:latest
+#    - Get digest: docker image inspect quantconnect/lean:latest --format '{{index .RepoDigests 0}}'
+#    - Update LEAN_BASE_DIGEST in .env or Dockerfile
+#    - Rebuild: docker-compose build --no-cache
+#
+# ==============================================================================

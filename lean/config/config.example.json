@@ -1,0 +1,72 @@
+{
+  "algorithm-type-name": "BuyAndHoldSPY",
+  "algorithm-language": "Python",
+  "algorithm-location": "/Lean/Algorithm/example_algorithm.py",
+
+  "environment": "backtesting",
+  "live-mode": false,
+
+  "data-folder": "/Lean/Data",
+  "results-destination-folder": "/Results",
+  "cache-location": "/Lean/Data",
+
+  "job-user-id": "0",
+  "api-access-token": "",
+  "job-organization-id": "",
+
+  "job-queue-handler": "QuantConnect.Queues.JobQueue",
+  "api-handler": "QuantConnect.Api.Api",
+  "messaging-handler": "QuantConnect.Messaging.Messaging",
+  "log-handler": "QuantConnect.Logging.CompositeLogHandler",
+  "history-provider": "SubscriptionDataReaderHistoryProvider",
+
+  "close-automatically": true,
+
+  "maximum-warmup-history-days": 5,
+
+  "version-id": "",
+  "security-master": true,
+
+  "show-missing-data-logs": false,
+
+  "transaction-log": "/Results/log.txt",
+
+  "reserved-words-prefix": "",
+
+  "local-execution": true,
+
+  "debug-mode": true,
+
+  "parameters": {},
+
+  "environments": {
+    "backtesting": {
+      "live-mode": false
+    },
+    "live-paper": {
+      "live-mode": true,
+      "live-mode-brokerage": "PaperBrokerage",
+      "data-queue-handler": "QuantConnect.Lean.Engine.DataFeeds.Queues.LiveDataQueue"
+    }
+  },
+
+  "backtesting": {
+    "start-date": "2020-01-01",
+    "end-date": "2023-12-31",
+    "cash": 100000,
+    "trade-on-calendar-days": false,
+    "benchmark": "SPY"
+  },
+
+  "live": {
+    "iqfeed-version": "6.2",
+    "iqfeed-username": "",
+    "iqfeed-password": "",
+    "iqfeed-productName": "",
+    "iqfeed-version-qualifier": ""
+  },
+
+  "data-providers": {},
+  "alpha-providers": {},
+  "optimizer-settings": {}
+}
