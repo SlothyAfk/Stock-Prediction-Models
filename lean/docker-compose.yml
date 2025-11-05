@@ -100,8 +100,11 @@ services:
       # Storage for live trading state
       - ./storage:/Lean/storage
 
+    # Override base image ENTRYPOINT to allow custom command
+    entrypoint: []
+
     # Command: Keep container running for interactive use
-    command: tail -f /dev/null
+    command: ["tail", "-f", "/dev/null"]
 
     # Port mappings
     ports:
