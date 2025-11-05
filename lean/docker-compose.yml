@@ -14,10 +14,16 @@ version: '3.8'
 #   - Health checks
 #
 # Usage:
-#   Development:  docker-compose up
-#   Production:   docker-compose -f docker-compose.yml up -d
+#   Start:        docker-compose up -d
+#   Exec in:      docker-compose exec lean-engine bash
+#   Stop:         docker-compose down
 #   Rebuild:      docker-compose build --no-cache
 #   Logs:         docker-compose logs -f lean-engine
+#
+# Interactive Workflow:
+#   1. docker-compose up -d              # Start pod
+#   2. docker-compose exec lean-engine bash    # Log in
+#   3. Run commands from inside pod
 #
 # ==============================================================================
 
@@ -68,25 +74,34 @@ services:
       # Timezone
       - TZ=${TZ:-America/New_York}
 
-    # Volume mounts
+    # Volume mounts - All writable for interactive development
     volumes:
       # Algorithm source code (your trading algorithms)
-      - ${ALGORITHM_PATH:-./algorithms}:/Lean/Algorithm:ro
+      - ./algorithms:/Lean/Algorithm
 
-      # LEAN configuration file
-      - ${CONFIG_PATH:-./config/config.json}:/Lean/Launcher/config.json:ro
+      # Custom extensions (data providers, execution models, etc.)
+      - ./custom:/Lean/Algorithm/custom
+
+      # Configuration directory (full directory, not single file)
+      - ./config:/Lean/config
+
+      # Scripts (for running inside pod)
+      - ./scripts:/Lean/scripts
 
       # Data directory (market data, cache, etc.)
-      - lean-data:/Lean/Data
+      - ./data:/Lean/data
 
       # Results directory (backtest results, logs, etc.)
-      - lean-results:/Results
+      - ./results:/Results
 
       # Logs directory
-      - lean-logs:/Lean/Logs
+      - ./logs:/Lean/Logs
 
       # Storage for live trading state
-      - lean-storage:/Lean/storage
+      - ./storage:/Lean/storage
+
+    # Command: Keep container running for interactive use
+    command: tail -f /dev/null
 
     # Port mappings
     ports:
@@ -110,13 +125,13 @@ services:
           cpus: '${LEAN_CPU_RESERVATION:-2.0}'
           memory: ${LEAN_MEMORY_RESERVATION:-4G}
 
-    # Health check
+    # Health check (container is healthy if running)
     healthcheck:
-      test: ["CMD", "pgrep", "-f", "QuantConnect.Lean.Launcher"]
+      test: ["CMD", "echo", "healthy"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 10s
 
     # Logging configuration
     logging:
@@ -173,36 +188,10 @@ services:
   #     - lean-engine
 
 # ==============================================================================
-# Volumes - Persistent Data Storage
+# Volumes - Using direct bind mounts for easy access
 # ==============================================================================
-volumes:
-  # Market data, historical data, cache
-  lean-data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${DATA_PATH:-./data}
-
-  # Backtest results, performance metrics
-  lean-results:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${RESULTS_PATH:-./results}
-
-  # Application logs
-  lean-logs:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ${LOGS_PATH:-./logs}
-
-  # Live trading state and storage
-  lean-storage:
-    driver: local
+# All directories are mounted directly from the host for interactive development
+# No named volumes needed - everything is in ./lean/ directory
 
 # ==============================================================================
 # Networks - Isolated Network for LEAN Services
